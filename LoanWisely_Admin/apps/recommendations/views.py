@@ -64,3 +64,41 @@ def exclusion_reasons(request):
     context = paginate(request, reasons, per_page=20) if reasons is not None else {"items": None}
     context.update({"result_id": result_id, "reasons": context.get("items")})
     return render(request, "recommendations/exclusion_reasons.html", context)
+
+
+def recommendation_es_search(request):
+    user_id = request.GET.get("user_id", "").strip()
+    policy_version = request.GET.get("policy_version", "").strip()
+    keyword = request.GET.get("keyword", "").strip()
+    date_from = request.GET.get("from", "").strip()
+    date_to = request.GET.get("to", "").strip()
+    page = request.GET.get("page", "0").strip()
+    size = request.GET.get("size", "20").strip()
+
+    result = None
+    if any([user_id, policy_version, keyword, date_from, date_to]):
+        try:
+            result = services.fetch_recommendation_es_search(
+                request,
+                user_id=user_id,
+                policy_version=policy_version,
+                keyword=keyword,
+                date_from=date_from,
+                date_to=date_to,
+                page=page,
+                size=size,
+            )
+        except RequestException as exc:
+            return render_request_exception(request, exc)
+
+    context = {
+        "user_id": user_id,
+        "policy_version": policy_version,
+        "keyword": keyword,
+        "date_from": date_from,
+        "date_to": date_to,
+        "page": page,
+        "size": size,
+        "result": result,
+    }
+    return render(request, "recommendations/es_search.html", context)

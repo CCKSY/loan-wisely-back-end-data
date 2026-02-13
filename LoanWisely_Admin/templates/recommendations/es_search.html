@@ -1,0 +1,85 @@
+{% extends "base/layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2>추천 이력 검색</h2>
+    <p class="description">Elastic Search 추천 이력을 조건으로 조회합니다. (page, size 항목 외 최소 하나 입력 필수입니다.)</p>
+</div>
+
+<form method="get" class="form-card" style="margin-bottom: 24px;">
+    <div class="form-row">
+        <label for="user-id">userId</label>
+        <input id="user-id" name="user_id" value="{{ user_id }}" placeholder="예: 1001" />
+    </div>
+    <div class="form-row">
+        <label for="policy-version">policyVersion</label>
+        <input id="policy-version" name="policy_version" value="{{ policy_version }}" placeholder="예: v1.0.0" />
+    </div>
+    <div class="form-row">
+        <label for="keyword">keyword</label>
+        <input id="keyword" name="keyword" value="{{ keyword }}" placeholder="요약/상태 키워드" />
+    </div>
+    <div class="form-row">
+        <label for="date-from">from</label>
+        <input id="date-from" name="from" value="{{ date_from }}" placeholder="YYYY-MM-DD" />
+    </div>
+    <div class="form-row">
+        <label for="date-to">to</label>
+        <input id="date-to" name="to" value="{{ date_to }}" placeholder="YYYY-MM-DD" />
+    </div>
+    <div class="form-row">
+        <label for="page">page</label>
+        <input id="page" name="page" value="{{ page }}" placeholder="0" />
+    </div>
+    <div class="form-row">
+        <label for="size">size</label>
+        <input id="size" name="size" value="{{ size }}" placeholder="20" />
+    </div>
+    <div class="form-row">
+        <button class="btn primary" type="submit">조회</button>
+    </div>
+</form>
+
+{% if result is not None %}
+    <div class="card">
+        <h3>조회 결과</h3>
+        <div class="muted" style="margin-bottom: 12px;">총 {{ result.total|default:0 }} 건</div>
+        {% if result.items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>recommendId</th>
+                    <th>userId</th>
+                    <th>policyVersion</th>
+                    <th>state</th>
+                    <th>summary</th>
+                    <th>createdAt</th>
+                    <th>recoRequestId</th>
+                    <th>recoResultId</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in result.items %}
+                <tr>
+                    <td>
+                        <a href="/management/recommendations/?id={{ item.recommendId }}">
+                            {{ item.recommendId }}
+                        </a>
+                    </td>
+                    <td>{{ item.userId }}</td>
+                    <td>{{ item.policyVersion }}</td>
+                    <td>{{ item.recommendState }}</td>
+                    <td>{{ item.explainSummary }}</td>
+                    <td>{{ item.createdAt }}</td>
+                    <td>{{ item.recoRequestId }}</td>
+                    <td>{{ item.recoResultId }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="muted">결과가 없습니다.</div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
